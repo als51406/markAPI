@@ -1,8 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearch } from './hooks/useSearch';
+import { usePagination } from './hooks/usePagination';
+import { useFavorites } from './hooks/useFavorites';
 import SearchBar from './components/SearchBar';
 import StatusFilter from './components/StatusFilter';
+import Pagination from './components/Pagination';
 import TrademarkModal from './components/TrademarkModal';
+import YearlyComparisonChart from './components/YearlyComparisonChart';
 import type { KRTrademark, USTrademark, Trademark, Country } from './types/trademark';
 import './App.css';
 
@@ -80,6 +84,8 @@ const formatDate = (dateStr: string): string => {
 interface AppState {
   krTrademarks: Trademark[];
   usTrademarks: Trademark[];
+  krRawData: KRTrademark[];
+  usRawData: USTrademark[];
   selectedCountry: Country;
   isLoading: boolean;
   error: string | null;
@@ -91,6 +97,8 @@ interface AppState {
 const initialState: AppState = {
   krTrademarks: [],
   usTrademarks: [],
+  krRawData: [],
+  usRawData: [],
   selectedCountry: 'KR',
   isLoading: true,
   error: null,
@@ -99,16 +107,66 @@ const initialState: AppState = {
 function App() {
   // 앱 상태 관리
   const [state, setState] = useState<AppState>(initialState);
-  const { krTrademarks, usTrademarks, selectedCountry, isLoading, error } = state;
+  const { krTrademarks, usTrademarks, krRawData, usRawData, selectedCountry, isLoading, error } = state;
 
   // 모달에 표시할 선택된 상표
   const [selectedTrademark, setSelectedTrademark] = useState<Trademark | null>(null);
+
+  // 즐겨찾기만 보기 모드
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+
+  // 차트 표시 여부
+  const [showChart, setShowChart] = useState(false);
+
+  // 정렬 상태 (sortBy: 정렬 기준, sortOrder: 오름차순/내림차순)
+  const [sortBy, setSortBy] = useState<'applicationDate' | 'productName'>('applicationDate');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // 현재 선택된 국가의 데이터
   const currentTrademarks = selectedCountry === 'KR' ? krTrademarks : usTrademarks;
 
   // 검색 훅 사용
   const { filters, filteredData, updateFilter, resetFilters } = useSearch(currentTrademarks);
+
+  // 즐겨찾기 훅 사용
+  const { isFavorite, toggleFavorite, favoritesCount } = useFavorites();
+
+  // 즐겨찾기 필터 적용
+  const favoritesFiltered = showFavoritesOnly
+    ? filteredData.filter((item) => isFavorite(item.id))
+    : filteredData;
+
+  // 정렬 적용
+  const displayData = [...favoritesFiltered].sort((a, b) => {
+    let comparison = 0;
+    
+    if (sortBy === 'applicationDate') {
+      comparison = a.applicationDate.localeCompare(b.applicationDate);
+    } else if (sortBy === 'productName') {
+      comparison = a.productName.localeCompare(b.productName, 'ko');
+    }
+    
+    return sortOrder === 'asc' ? comparison : -comparison;
+  });
+
+  // 페이지네이션 훅 사용
+  const pagination = usePagination({ totalItems: displayData.length });
+
+  // 현재 페이지에 표시할 데이터
+  const paginatedData = displayData.slice(pagination.startIndex, pagination.endIndex);
+
+  // 정렬 변경 핸들러
+  const handleSortChange = (newSortBy: 'applicationDate' | 'productName') => {
+    if (sortBy === newSortBy) {
+      // 같은 기준이면 정렬 순서 토글
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      // 다른 기준이면 새 기준으로 변경 (기본: 내림차순)
+      setSortBy(newSortBy);
+      setSortOrder('desc');
+    }
+    pagination.resetPagination();
+  };
 
   /**
    * JSON 데이터 불러오기
@@ -144,6 +202,8 @@ function App() {
         ...prev,
         krTrademarks: normalizedKR,
         usTrademarks: normalizedUS,
+        krRawData: krRawData,
+        usRawData: usRawData,
         isLoading: false,
       }));
 
@@ -164,6 +224,7 @@ function App() {
   const handleCountryChange = (country: Country) => {
     setState(prev => ({ ...prev, selectedCountry: country }));
     resetFilters(); // 국가 변경 시 필터 초기화
+    pagination.resetPagination(); // 페이지네이션 초기화
   };
 
   // 컴포넌트 마운트 시 데이터 로드
@@ -215,13 +276,42 @@ function App() {
         >
           🇺🇸 미국 ({usTrademarks.length})
         </button>
+        <button
+          className={`favorites-tab ${showFavoritesOnly ? 'active' : ''}`}
+          onClick={() => {
+            setShowFavoritesOnly(!showFavoritesOnly);
+            pagination.resetPagination();
+          }}
+        >
+          ⭐ 즐겨찾기 ({favoritesCount})
+        </button>
+        <button
+          className={`chart-tab ${showChart ? 'active' : ''}`}
+          onClick={() => setShowChart(!showChart)}
+        >
+          📊 출원 추이
+        </button>
       </div>
+
+      {/* 연도별 출원 추이 차트 */}
+      {showChart && (
+        <YearlyComparisonChart
+          krTrademarks={krRawData}
+          usTrademarks={usRawData}
+        />
+      )}
 
       {/* 검색 바 */}
       <SearchBar
         filters={filters}
-        onFilterChange={updateFilter}
-        onReset={resetFilters}
+        onFilterChange={(key, value) => {
+          updateFilter(key, value);
+          pagination.resetPagination(); // 검색 시 페이지 초기화
+        }}
+        onReset={() => {
+          resetFilters();
+          pagination.resetPagination(); // 리셋 시 페이지 초기화
+        }}
         totalCount={currentTrademarks.length}
         filteredCount={filteredData.length}
       />
@@ -229,29 +319,70 @@ function App() {
       {/* 상태 필터 */}
       <StatusFilter
         selectedStatuses={filters.statuses}
-        onStatusChange={(statuses) => updateFilter('statuses', statuses)}
+        onStatusChange={(statuses) => {
+          updateFilter('statuses', statuses);
+          pagination.resetPagination(); // 필터 변경 시 페이지 초기화
+        }}
         country={selectedCountry}
       />
 
+      {/* 정렬 옵션 */}
+      <div className="sort-options">
+        <span className="sort-label">정렬:</span>
+        <button
+          className={`sort-btn ${sortBy === 'applicationDate' ? 'active' : ''}`}
+          onClick={() => handleSortChange('applicationDate')}
+        >
+          출원일순 {sortBy === 'applicationDate' && (sortOrder === 'desc' ? '↓' : '↑')}
+        </button>
+        <button
+          className={`sort-btn ${sortBy === 'productName' ? 'active' : ''}`}
+          onClick={() => handleSortChange('productName')}
+        >
+          상표명순 {sortBy === 'productName' && (sortOrder === 'desc' ? '↓' : '↑')}
+        </button>
+      </div>
+
       {/* 상표 리스트 */}
       <div className="trademark-list">
-        {filteredData.length === 0 ? (
+        {displayData.length === 0 ? (
           <div className="empty-state">
-            <p>검색 결과가 없습니다.</p>
-            <p>다른 검색어로 시도해보세요.</p>
+            {showFavoritesOnly ? (
+              <>
+                <p>즐겨찾기한 상표가 없습니다.</p>
+                <p>상표 카드의 ⭐ 버튼을 눌러 추가해보세요.</p>
+              </>
+            ) : (
+              <>
+                <p>검색 결과가 없습니다.</p>
+                <p>다른 검색어로 시도해보세요.</p>
+              </>
+            )}
           </div>
         ) : (
-          filteredData.slice(0, 20).map((trademark: Trademark) => (
+          paginatedData.map((trademark: Trademark) => (
             <div 
               key={trademark.id} 
-              className="trademark-card"
+              className={`trademark-card ${isFavorite(trademark.id) ? 'favorite' : ''}`}
               onClick={() => setSelectedTrademark(trademark)}
             >
               <div className="card-header">
                 <h3>{trademark.productName}</h3>
-                <span className={`status-badge ${trademark.registerStatus}`}>
-                  {trademark.registerStatus}
-                </span>
+                <div className="card-actions">
+                  <button
+                    className={`favorite-btn ${isFavorite(trademark.id) ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation(); // 카드 클릭 이벤트 전파 방지
+                      toggleFavorite(trademark.id);
+                    }}
+                    title={isFavorite(trademark.id) ? '즐겨찾기 해제' : '즐겨찾기 추가'}
+                  >
+                    {isFavorite(trademark.id) ? '★' : '☆'}
+                  </button>
+                  <span className={`status-badge ${trademark.registerStatus}`}>
+                    {trademark.registerStatus}
+                  </span>
+                </div>
               </div>
               {trademark.productNameEng && trademark.productNameKr && (
                 <p className="eng-name">{trademark.productNameEng}</p>
@@ -265,11 +396,18 @@ function App() {
         )}
       </div>
 
-      {/* 더 많은 결과 표시 */}
-      {filteredData.length > 20 && (
-        <p className="more-results">
-          외 {filteredData.length - 20}건이 더 있습니다.
-        </p>
+      {/* 페이지네이션 */}
+      {displayData.length > 0 && (
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          totalItems={displayData.length}
+          startIndex={pagination.startIndex}
+          endIndex={pagination.endIndex}
+          onPageChange={pagination.goToPage}
+          onPrevPage={pagination.prevPage}
+          onNextPage={pagination.nextPage}
+        />
       )}
 
       {/* 상세 정보 모달 */}
