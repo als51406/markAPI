@@ -379,3 +379,201 @@
   color: #666;
 }
 
+/* 모달 오버레이 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 모달 컨텐츠 */
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 700px;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 모달 헤더 */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px;
+  border-bottom: 1px solid #eee;
+  background: #f8f9fa;
+}
+
+.modal-title-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-title-section h2 {
+  margin: 0;
+  font-size: 22px;
+  color: #333;
+  word-break: break-word;
+}
+
+.country-badge {
+  padding: 4px 10px;
+  background: #e9ecef;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #495057;
+}
+
+.status-badge.large {
+  padding: 6px 14px;
+  font-size: 14px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
+/* 모달 본문 */
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* 정보 섹션 */
+.info-section {
+  margin-bottom: 24px;
+}
+
+.info-section:last-child {
+  margin-bottom: 0;
+}
+
+.info-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #333;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #007bff;
+}
+
+/* 정보 그리드 */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.info-item {
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.info-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.info-label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.info-value {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  word-break: break-all;
+}
+
+/* 모달 푸터 */
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.close-modal-btn {
+  padding: 10px 24px;
+  font-size: 14px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.close-modal-btn:hover {
+  background: #0056b3;
+}
+
+/* 반응형 - 모달 */
+@media (max-width: 600px) {
+  .modal-content {
+    max-height: 90vh;
+  }
+
+  .modal-header {
+    padding: 16px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-title-section h2 {
+    font-size: 18px;
+  }
+}
+

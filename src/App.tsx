@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearch } from './hooks/useSearch';
 import SearchBar from './components/SearchBar';
 import StatusFilter from './components/StatusFilter';
+import TrademarkModal from './components/TrademarkModal';
 import type { KRTrademark, USTrademark, Trademark, Country } from './types/trademark';
 import './App.css';
 
@@ -99,6 +100,9 @@ function App() {
   // 앱 상태 관리
   const [state, setState] = useState<AppState>(initialState);
   const { krTrademarks, usTrademarks, selectedCountry, isLoading, error } = state;
+
+  // 모달에 표시할 선택된 상표
+  const [selectedTrademark, setSelectedTrademark] = useState<Trademark | null>(null);
 
   // 현재 선택된 국가의 데이터
   const currentTrademarks = selectedCountry === 'KR' ? krTrademarks : usTrademarks;
@@ -238,7 +242,11 @@ function App() {
           </div>
         ) : (
           filteredData.slice(0, 20).map((trademark: Trademark) => (
-            <div key={trademark.id} className="trademark-card">
+            <div 
+              key={trademark.id} 
+              className="trademark-card"
+              onClick={() => setSelectedTrademark(trademark)}
+            >
               <div className="card-header">
                 <h3>{trademark.productName}</h3>
                 <span className={`status-badge ${trademark.registerStatus}`}>
@@ -262,6 +270,14 @@ function App() {
         <p className="more-results">
           외 {filteredData.length - 20}건이 더 있습니다.
         </p>
+      )}
+
+      {/* 상세 정보 모달 */}
+      {selectedTrademark && (
+        <TrademarkModal
+          trademark={selectedTrademark}
+          onClose={() => setSelectedTrademark(null)}
+        />
       )}
     </div>
   );
