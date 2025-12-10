@@ -5,6 +5,11 @@
   padding: 20px;
 }
 
+.app h1 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
 /* 국가 탭 */
 .country-tabs {
   display: flex;
@@ -32,6 +37,85 @@
   border-color: #007bff;
 }
 
+/* 검색 바 */
+.search-bar {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.search-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.search-row:last-of-type {
+  margin-bottom: 10px;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.search-field input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.search-field input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.search-actions {
+  display: flex;
+  align-items: flex-end;
+  flex: 0 0 auto;
+  min-width: auto;
+}
+
+.reset-btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.reset-btn:hover {
+  background: #5a6268;
+}
+
+.search-result-count {
+  font-size: 14px;
+  color: #666;
+}
+
+.search-result-count strong {
+  color: #007bff;
+  font-size: 16px;
+}
+
 /* 상표 리스트 */
 .trademark-list {
   display: grid;
@@ -47,15 +131,25 @@
   text-align: left;
   background: white;
   transition: box-shadow 0.2s;
+  cursor: pointer;
 }
 
 .trademark-card:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-color: #007bff;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
 }
 
 .trademark-card h3 {
-  margin: 0 0 5px 0;
+  margin: 0;
   color: #333;
+  font-size: 18px;
 }
 
 .trademark-card .eng-name {
@@ -64,8 +158,224 @@
   font-size: 14px;
 }
 
-.trademark-card p {
+.card-info {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.card-info p {
   margin: 5px 0;
   font-size: 14px;
   color: #555;
 }
+
+.card-info .label {
+  color: #888;
+  font-weight: 500;
+}
+
+/* 상태 배지 */
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.등록,
+.status-badge.LIVE {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.실효,
+.status-badge.DEAD {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-badge.거절 {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.출원 {
+  background: #cce5ff;
+  color: #004085;
+}
+
+/* 빈 결과 */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.empty-state p {
+  margin: 5px 0;
+}
+
+/* 더보기 */
+.more-results {
+  text-align: center;
+  color: #666;
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+/* 로딩 상태 */
+.loading-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.loading-state p {
+  font-size: 16px;
+}
+
+/* 에러 상태 */
+.error-state {
+  text-align: center;
+  padding: 40px 20px;
+  background: #fff5f5;
+  border: 1px solid #feb2b2;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.error-state p:first-child {
+  font-size: 18px;
+  font-weight: 600;
+  color: #c53030;
+  margin-bottom: 10px;
+}
+
+.error-state p:nth-child(2) {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.error-state button {
+  padding: 10px 24px;
+  background: #c53030;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.error-state button:hover {
+  background: #9b2c2c;
+}
+
+/* 상태 필터 */
+.status-filter {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+}
+
+.status-filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.status-filter .filter-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.select-all-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.select-all-btn:hover {
+  background: #f0f0f0;
+}
+
+.select-all-btn.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.status-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.status-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.status-checkbox:hover {
+  border-color: #007bff;
+}
+
+.status-checkbox input {
+  accent-color: #007bff;
+}
+
+.status-checkbox input:checked + .checkbox-label {
+  font-weight: 600;
+}
+
+/* 상태별 체크박스 색상 */
+.status-checkbox:has(input:checked) .checkbox-label.등록,
+.status-checkbox:has(input:checked) .checkbox-label.LIVE {
+  color: #155724;
+}
+
+.status-checkbox:has(input:checked) .checkbox-label.실효,
+.status-checkbox:has(input:checked) .checkbox-label.DEAD {
+  color: #721c24;
+}
+
+.status-checkbox:has(input:checked) .checkbox-label.거절 {
+  color: #856404;
+}
+
+.status-checkbox:has(input:checked) .checkbox-label.출원,
+.status-checkbox:has(input:checked) .checkbox-label.공고 {
+  color: #004085;
+}
+
+.status-checkbox:has(input:checked) .checkbox-label.소멸,
+.status-checkbox:has(input:checked) .checkbox-label.취하,
+.status-checkbox:has(input:checked) .checkbox-label.포기,
+.status-checkbox:has(input:checked) .checkbox-label.무효 {
+  color: #6c757d;
+}
+
+.selected-count {
+  margin: 12px 0 0 0;
+  font-size: 12px;
+  color: #666;
+}
+
