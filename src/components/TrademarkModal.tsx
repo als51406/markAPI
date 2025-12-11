@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import type { Trademark } from '../types/trademark';
 
 interface TrademarkModalProps {
@@ -22,16 +23,21 @@ const formatArray = (arr: string[]): string => {
 };
 
 const TrademarkModal = ({ trademark, onClose }: TrademarkModalProps) => {
+  // ESC 키로 닫기 (글로벌 이벤트 리스너)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   // 모달 바깥 클릭 시 닫기
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
-  // ESC 키로 닫기
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
       onClose();
     }
   };
@@ -40,8 +46,6 @@ const TrademarkModal = ({ trademark, onClose }: TrademarkModalProps) => {
     <div 
       className="modal-overlay" 
       onClick={handleOverlayClick}
-      onKeyDown={handleKeyDown}
-      tabIndex={-1}
     >
       <div className="modal-content">
         {/* 모달 헤더 */}

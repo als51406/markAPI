@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearch } from './hooks/useSearch';
 import { usePagination } from './hooks/usePagination';
 import { useFavorites } from './hooks/useFavorites';
+import { useDarkMode } from './hooks/useDarkMode';
+import { downloadCSV } from './utils/exportCSV';
 import SearchBar from './components/SearchBar';
 import StatusFilter from './components/StatusFilter';
 import Pagination from './components/Pagination';
@@ -109,6 +111,9 @@ function App() {
   const [state, setState] = useState<AppState>(initialState);
   const { krTrademarks, usTrademarks, krRawData, usRawData, selectedCountry, isLoading, error } = state;
 
+  // 다크 모드
+  const { isDark, toggleTheme } = useDarkMode();
+
   // 모달에 표시할 선택된 상표
   const [selectedTrademark, setSelectedTrademark] = useState<Trademark | null>(null);
 
@@ -154,6 +159,73 @@ function App() {
 
   // 현재 페이지에 표시할 데이터
   const paginatedData = displayData.slice(pagination.startIndex, pagination.endIndex);
+
+  // 키보드 단축키 설정
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // 입력 필드에서는 단축키 비활성화
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      // 모달이 열려있으면 다른 단축키 비활성화 (ESC는 모달에서 처리)
+      if (selectedTrademark) {
+        return;
+      }
+
+      switch (e.key) {
+        case 'ArrowLeft':
+          // 이전 페이지
+          if (pagination.currentPage > 1) {
+            pagination.prevPage();
+          }
+          break;
+        case 'ArrowRight':
+          // 다음 페이지
+          if (pagination.currentPage < pagination.totalPages) {
+            pagination.nextPage();
+          }
+          break;
+        case '1':
+          // 한국 탭
+          if (!e.ctrlKey && !e.metaKey) {
+            handleCountryChange('KR');
+          }
+          break;
+        case '2':
+          // 미국 탭
+          if (!e.ctrlKey && !e.metaKey) {
+            handleCountryChange('US');
+          }
+          break;
+        case 'f':
+        case 'F':
+          // 즐겨찾기 토글
+          if (!e.ctrlKey && !e.metaKey) {
+            setShowFavoritesOnly(prev => !prev);
+            pagination.resetPagination();
+          }
+          break;
+        case 'c':
+        case 'C':
+          // 차트 토글
+          if (!e.ctrlKey && !e.metaKey) {
+            setShowChart(prev => !prev);
+          }
+          break;
+        case 'd':
+        case 'D':
+          // 다크 모드 토글
+          if (!e.ctrlKey && !e.metaKey) {
+            toggleTheme();
+          }
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [pagination, selectedTrademark, toggleTheme]);
 
   // 정렬 변경 핸들러
   const handleSortChange = (newSortBy: 'applicationDate' | 'productName') => {
@@ -260,7 +332,16 @@ function App() {
 
   return (
     <div className="app">
-      <h1>🔍 상표 검색 서비스</h1>
+      <header className="app-header">
+        <h1>🔍 상표 검색 서비스</h1>
+        <button 
+          className="theme-toggle" 
+          onClick={toggleTheme}
+          title={isDark ? '라이트 모드로 전환' : '다크 모드로 전환'}
+        >
+          {isDark ? '☀️' : '🌙'}
+        </button>
+      </header>
 
       {/* 국가 선택 탭 */}
       <div className="country-tabs">
@@ -341,6 +422,14 @@ function App() {
         >
           상표명순 {sortBy === 'productName' && (sortOrder === 'desc' ? '↓' : '↑')}
         </button>
+        <button
+          className="export-btn"
+          onClick={() => downloadCSV(displayData, `trademarks_${selectedCountry}`)}
+          disabled={displayData.length === 0}
+          title="현재 검색 결과를 CSV 파일로 내보내기"
+        >
+          📥 내보내기 ({displayData.length}건)
+        </button>
       </div>
 
       {/* 상표 리스트 */}
@@ -417,6 +506,18 @@ function App() {
           onClose={() => setSelectedTrademark(null)}
         />
       )}
+
+      {/* 키보드 단축키 안내 */}
+      <footer className="keyboard-shortcuts">
+        <span className="shortcut-title">⌨️ 단축키:</span>
+        <span className="shortcut-item"><kbd>←</kbd><kbd>→</kbd> 페이지 이동</span>
+        <span className="shortcut-item"><kbd>1</kbd> 한국</span>
+        <span className="shortcut-item"><kbd>2</kbd> 미국</span>
+        <span className="shortcut-item"><kbd>F</kbd> 즐겨찾기</span>
+        <span className="shortcut-item"><kbd>C</kbd> 차트</span>
+        <span className="shortcut-item"><kbd>D</kbd> 다크모드</span>
+        <span className="shortcut-item"><kbd>ESC</kbd> 모달 닫기</span>
+      </footer>
     </div>
   );
 }
