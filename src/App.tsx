@@ -127,6 +127,9 @@ function App() {
   const [sortBy, setSortBy] = useState<'applicationDate' | 'productName'>('applicationDate');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
+  // 다중 선택 상태
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
   // 현재 선택된 국가의 데이터
   const currentTrademarks = selectedCountry === 'KR' ? krTrademarks : usTrademarks;
 
@@ -238,6 +241,50 @@ function App() {
       setSortOrder('desc');
     }
     pagination.resetPagination();
+  };
+
+  // 개별 항목 선택/해제
+  const toggleSelectItem = (id: string) => {
+    setSelectedIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  // 현재 페이지 전체 선택/해제
+  const toggleSelectAll = () => {
+    const allSelected = paginatedData.every(item => selectedIds.has(item.id));
+    if (allSelected) {
+      // 전체 해제
+      setSelectedIds(prev => {
+        const newSet = new Set(prev);
+        paginatedData.forEach(item => newSet.delete(item.id));
+        return newSet;
+      });
+    } else {
+      // 전체 선택
+      setSelectedIds(prev => {
+        const newSet = new Set(prev);
+        paginatedData.forEach(item => newSet.add(item.id));
+        return newSet;
+      });
+    }
+  };
+
+  // 선택 초기화
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+  };
+
+  // 선택된 항목 내보내기
+  const exportSelected = () => {
+    const selectedData = displayData.filter(item => selectedIds.has(item.id));
+    downloadCSV(selectedData, `trademarks_selected_${selectedCountry}`);
   };
 
   /**
@@ -407,7 +454,7 @@ function App() {
         country={selectedCountry}
       />
 
-      {/* 정렬 옵션 */}
+      {/* 정렬 및 선택 옵션 */}
       <div className="sort-options">
         <span className="sort-label">정렬:</span>
         <button
@@ -422,14 +469,47 @@ function App() {
         >
           상표명순 {sortBy === 'productName' && (sortOrder === 'desc' ? '↓' : '↑')}
         </button>
-        <button
-          className="export-btn"
-          onClick={() => downloadCSV(displayData, `trademarks_${selectedCountry}`)}
-          disabled={displayData.length === 0}
-          title="현재 검색 결과를 CSV 파일로 내보내기"
-        >
-          📥 내보내기 ({displayData.length}건)
-        </button>
+
+        {/* 내보내기 버튼 */}
+        {selectedIds.size > 0 ? (
+          <button
+            className="export-btn selected"
+            onClick={exportSelected}
+          >
+            📥 선택 내보내기 ({selectedIds.size}건)
+          </button>
+        ) : (
+          <button
+            className="export-btn"
+            onClick={() => downloadCSV(displayData, `trademarks_${selectedCountry}`)}
+            disabled={displayData.length === 0}
+            title="현재 검색 결과를 CSV 파일로 내보내기"
+          >
+            📥 전체 내보내기 ({displayData.length}건)
+          </button>
+        )}
+      </div>
+
+      {/* 선택 컨트롤 바 */}
+      <div className="selection-controls">
+        <label className="select-all-checkbox">
+          <input
+            type="checkbox"
+            checked={paginatedData.length > 0 && paginatedData.every(item => selectedIds.has(item.id))}
+            onChange={toggleSelectAll}
+          />
+          <span>현재 페이지 전체 선택</span>
+        </label>
+        {selectedIds.size > 0 && (
+          <>
+            <span className="selection-count">
+              {selectedIds.size}개 선택됨
+            </span>
+            <button className="clear-selection-btn" onClick={clearSelection}>
+              선택 해제
+            </button>
+          </>
+        )}
       </div>
 
       {/* 상표 리스트 */}
@@ -452,7 +532,7 @@ function App() {
           paginatedData.map((trademark: Trademark) => (
             <div 
               key={trademark.id} 
-              className={`trademark-card ${isFavorite(trademark.id) ? 'favorite' : ''}`}
+              className={`trademark-card ${isFavorite(trademark.id) ? 'favorite' : ''} ${selectedIds.has(trademark.id) ? 'selected' : ''}`}
               onClick={() => setSelectedTrademark(trademark)}
             >
               <div className="card-header">
@@ -476,9 +556,23 @@ function App() {
               {trademark.productNameEng && trademark.productNameKr && (
                 <p className="eng-name">{trademark.productNameEng}</p>
               )}
-              <div className="card-info">
-                <p><span className="label">출원번호:</span> {trademark.applicationNumber}</p>
-                <p><span className="label">출원일:</span> {formatDate(trademark.applicationDate)}</p>
+              <div className="card-info-row">
+                <div className="card-info">
+                  <p><span className="label">출원번호:</span> {trademark.applicationNumber}</p>
+                  <p><span className="label">출원일:</span> {formatDate(trademark.applicationDate)}</p>
+                </div>
+                {/* 선택 체크박스 */}
+                <label 
+                  className="card-select-checkbox"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(trademark.id)}
+                    onChange={() => toggleSelectItem(trademark.id)}
+                  />
+                  <span>선택</span>
+                </label>
               </div>
             </div>
           ))
