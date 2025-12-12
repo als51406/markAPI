@@ -1,0 +1,57 @@
+[
+  {
+    "registrationNumber": "6001234",
+    "applicationNumber": "2020-012345",
+    "applicationDate": "2020-03-15",
+    "registrationDate": "2021-01-20",
+    "trademarkName": "サクラテック",
+    "trademarkNameEn": "SAKURA TECH",
+    "applicant": "株式会社サクラテクノロジー",
+    "status": "登録",
+    "classificationCodes": ["9", "42"]
+  },
+  {
+    "registrationNumber": "6001235",
+    "applicationNumber": "2020-012346",
+    "applicationDate": "2020-04-10",
+    "registrationDate": "2021-02-15",
+    "trademarkName": "富士ブランド",
+    "trademarkNameEn": "FUJI BRAND",
+    "applicant": "富士商事株式会社",
+    "status": "登録",
+    "classificationCodes": ["25", "35"]
+  },
+  {
+    "registrationNumber": "6001236",
+    "applicationNumber": "2020-012347",
+    "applicationDate": "2020-05-20",
+    "registrationDate": null,
+    "trademarkName": "東京スタイル",
+    "trademarkNameEn": "TOKYO STYLE",
+    "applicant": "東京ファッション株式会社",
+    "status": "出願中",
+    "classificationCodes": ["25"]
+  },
+  {
+    "registrationNumber": "6001237",
+    "applicationNumber": "2020-012348",
+    "applicationDate": "2020-06-01",
+    "registrationDate": "2021-04-10",
+    "trademarkName": "京都クラフト",
+    "trademarkNameEn": "KYOTO CRAFT",
+    "applicant": "京都工芸株式会社",
+    "status": "登録",
+    "classificationCodes": ["20", "21"]
+  },
+  {
+    "registrationNumber": "6001238",
+    "applicationNumber": "2020-012349",
+    "applicationDate": "2020-07-15",
+    "registrationDate": null,
+    "trademarkName": "大阪フーズ",
+    "trademarkNameEn": "OSAKA FOODS",
+    "applicant": "大阪食品株式会社",
+    "status": "拒絶",
+    "classificationCodes": ["29", "30"]
+  }
+]

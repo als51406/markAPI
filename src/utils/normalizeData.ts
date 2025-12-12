@@ -1,4 +1,4 @@
-import type { KRTrademark, USTrademark, Trademark } from '../types/trademark';
+import type { KRTrademark, USTrademark, JPTrademark, Trademark } from '../types/trademark';
 
 // 한국 데이터를 통합 형식으로 변환
 export const normalizeKRTrademark = (data: KRTrademark): Trademark => {
@@ -54,5 +54,47 @@ export const normalizeUSTrademark = (data: USTrademark): Trademark => {
     classificationCodes: data.asignProductMainCodeList || [],
     subClassificationCodes: data.usClassCodeList || [], // US 코드
     viennaCodeList: data.viennaCodeList || [],
+  };
+};
+
+// 일본 상태값 매핑
+const JP_STATUS_MAP: Record<string, string> = {
+  '登録': '등록',
+  '出願中': '출원',
+  '拒絶': '거절',
+  '失効': '실효',
+  '取下': '취하',
+};
+
+// 일본 데이터를 통합 형식으로 변환
+export const normalizeJPTrademark = (data: JPTrademark): Trademark => {
+  // 일본 날짜 형식 (YYYY-MM-DD) -> YYYYMMDD 변환
+  const formatDate = (date: string | null): string => {
+    if (!date) return '';
+    return date.replace(/-/g, '');
+  };
+
+  return {
+    id: `JP-${data.applicationNumber}`,
+    country: 'JP',
+    productName: data.trademarkName || data.trademarkNameEn || '(商標名なし)',
+    productNameKr: null, // 일본은 한글명 없음
+    productNameEng: data.trademarkNameEn,
+    applicationNumber: data.applicationNumber,
+    applicationDate: formatDate(data.applicationDate),
+    registerStatus: JP_STATUS_MAP[data.status] || data.status,
+    publicationNumber: null,
+    publicationDate: null,
+    registrationNumber: data.registrationNumber ? [data.registrationNumber] : [],
+    registrationDate: data.registrationDate ? [formatDate(data.registrationDate)] : [],
+    registrationPubNumber: null,
+    registrationPubDate: null,
+    internationalRegDate: null,
+    internationalRegNumbers: [],
+    priorityClaimNumList: [],
+    priorityClaimDateList: [],
+    classificationCodes: data.classificationCodes || [],
+    subClassificationCodes: [],
+    viennaCodeList: [],
   };
 };

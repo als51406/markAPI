@@ -38,8 +38,21 @@ export interface USTrademark {
   viennaCodeList: string[] | null;
 }
 
+// 일본 상표 데이터 타입 (원본)
+export interface JPTrademark {
+  registrationNumber: string;
+  applicationNumber: string;
+  applicationDate: string;
+  registrationDate: string | null;
+  trademarkName: string;
+  trademarkNameEn: string | null;
+  applicant: string;
+  status: string;
+  classificationCodes: string[];
+}
+
 // 국가 타입
-export type Country = 'KR' | 'US';
+export type Country = 'KR' | 'US' | 'JP';
 
 // 통합 상표 타입 (정규화된 데이터)
 export interface Trademark {

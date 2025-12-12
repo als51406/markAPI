@@ -23,6 +23,13 @@ const STATUS_OPTIONS: Record<Country, { value: string; label: string }[]> = {
     { value: 'LIVE', label: 'LIVE (유효)' },
     { value: 'DEAD', label: 'DEAD (무효)' },
   ],
+  JP: [
+    { value: '등록', label: '등록' },
+    { value: '출원', label: '출원' },
+    { value: '거절', label: '거절' },
+    { value: '실효', label: '실효' },
+    { value: '취하', label: '취하' },
+  ],
 };
 
 const StatusFilter = ({ selectedStatuses, onStatusChange, country }: StatusFilterProps) => {
